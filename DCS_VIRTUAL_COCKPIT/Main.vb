@@ -1,4 +1,5 @@
 ﻿Imports System.Diagnostics
+Imports System.Text.RegularExpressions
 Public Class Main
 
     Dim _BackPath As String = ".\DCS_CONTROL_EXE_BUILD\back-end-build\app.exe"
@@ -13,7 +14,23 @@ Public Class Main
     Private _BackProcess As Process = Nothing
     Private _FrontProcess As Process = Nothing
 
+    Dim FrontUrls As New List(Of String)()
+
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        Try
+            Dim processes() As Process = Process.GetProcessesByName("dcs-panel-app")
+
+            For Each p As Process In processes
+                p.Kill()
+                p.WaitForExit() ' Optional: Waits for the process to fully terminate
+                p.Close()       ' Frees resources associated with the component
+            Next
+
+        Catch ex As Exception
+            Console.WriteLine("Error killing process: " & ex.Message)
+        End Try
+
         isBackRun = False
         btnBackStart.Text = "Start"
         _BackProcess = Nothing
@@ -72,6 +89,7 @@ Public Class Main
                                                                              strFrontConsoleText &= Environment.NewLine & logFrontText
                                                                              Console.WriteLine(logFrontText)
                                                                              txtFrontConsoleStatus.Text = strFrontConsoleText
+                                                                             ExtractAndStoreUrls(logFrontText)
                                                                              ' ถ้ามี TextBox ไว้แสดงผล ให้เอาไปใส่ต่อตรงนี้ เช่น txtConsole.AppendText(...)
                                                                              isFrontRun = True
                                                                              lblFrontStatus.Text = "RUNNING"
@@ -150,6 +168,27 @@ Public Class Main
                 Console.WriteLine("Kill Error: " & ex.Message)
             End Try
         End If
+    End Sub
+
+    ' ==========================================
+    ' ฟังก์ชันสำหรับดึง URL จากข้อความ Log ด้วย Regex
+    ' ==========================================
+    Private Sub ExtractAndStoreUrls(logText As String)
+        ' รูปแบบ Regex สำหรับค้นหาลิงก์ http:// หรือ https://
+        Dim pattern As String = "https?://[^\s]+"
+        Dim matches As MatchCollection = Regex.Matches(logText, pattern)
+
+        For Each match As Match In matches
+            Dim foundUrl As String = match.Value
+
+            ' ป้องกันการเก็บลิงก์ซ้ำกัน
+            If Not FrontUrls.Contains(foundUrl) Then
+                FrontUrls.Add(foundUrl)
+
+                ' ทดสอบพิมพ์ดูใน Console หรือเอาไปใส่ ComboBox / ListBox
+                Console.WriteLine("Found link: " & foundUrl)
+            End If
+        Next
     End Sub
 
     ' ==========================================

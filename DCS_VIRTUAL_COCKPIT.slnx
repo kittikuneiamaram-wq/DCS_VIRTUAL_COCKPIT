@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="DCS_VIRTUAL_COCKPIT/DCS_VIRTUAL_COCKPIT.vbproj" />
+  <Project Path="DCS_VIRTUAL_COCKPIT/DCS_VIRTUAL_COCKPIT.vbproj" Id="4500a0ca-b606-4d58-9479-bbb2f2d20c0f" />
+  <Project Path="setupDCSVirtualCockpit/setupDCSVirtualCockpit.vdproj" Type="Installer" />
 </Solution>
